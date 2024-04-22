@@ -1,0 +1,23 @@
+{
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+
+    "files.exclude": {
+        "**/__pycache__/": true,
+        "**/.pytest_cache/": true
+    },
+    "editor.rulers": [
+        79
+    ],
+    "flake8.args": [
+        "--max-line-length=79"
+    ],
+    "black-formatter.args": [
+        "--line-length=79"
+    ]
+}
