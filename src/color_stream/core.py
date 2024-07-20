@@ -1,5 +1,6 @@
 """core.py is the main tool definition."""
 
+import contextlib
 import os
 import signal
 import subprocess
@@ -56,7 +57,12 @@ def main() -> None:
         os.kill(process.pid, sig_num)
         sys.exit(128 + sig_num)
 
-    signals_to_pass = [signal.SIGINT, signal.SIGTERM, signal.SIGHUP]
+    signals_to_pass = [signal.SIGINT, signal.SIGTERM]
+
+    # SIGHUP doesn't exist on Windows. Skip it it's unavailable.
+    with contextlib.suppress(AttributeError):
+        signals_to_pass.append(signal.SIGHUP)
+
     for sig in signals_to_pass:
         signal.signal(sig, signal_handler)
 
