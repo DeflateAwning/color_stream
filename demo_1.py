@@ -1,24 +1,25 @@
-#!/usr/bin/env python3
+"""A demonstration script to show how `color_stream` works.
 
+Call like: `python3 -m color_stream 'python3 demo_1.py'`
+"""
+
+import random
 import sys
 import time
-import random
 from typing import Literal
-
-# This script a demonstration to show how split_colors.py works.
 
 
 def print_to_stream(
-    message, stream: Literal["stdout", "stderr"], end: str = "\n"
+    message: str, stream: Literal["stdout", "stderr"], end: str = "\n"
 ) -> None:
+    """Print output to either stdout or stderr."""
     if stream == "stdout":
-        # print(message, file=sys.stdout, end=end)
         stream_id = sys.stdout
     elif stream == "stderr":
-        # print(message, file=sys.stderr, end=end)
         stream_id = sys.stderr
     else:
-        raise ValueError(f"Invalid stream: {stream}")
+        msg = f"Invalid stream: {stream}"
+        raise ValueError(msg)
 
     stream_id.write(message)
     stream_id.write(end)
@@ -26,6 +27,7 @@ def print_to_stream(
 
 
 def main_1() -> None:
+    """Print various stdout and stderr messages."""
     print_to_stream("Hello, stdout", "stdout")
     print_to_stream("Hello, stderr", "stderr")
     time.sleep(1)
@@ -37,7 +39,7 @@ def main_1() -> None:
     print_to_stream("Done counting!", "stdout")
 
     for i in range(5):
-        f = random.choice(["stdout", "stderr"])
+        f = random.choice(["stdout", "stderr"])  # noqa: S311
         print_to_stream(f"Counting {i} onto {f}...", "stderr", end=" ")
         time.sleep(0.5)
 

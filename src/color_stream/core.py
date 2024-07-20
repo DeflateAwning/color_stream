@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
+"""core.py is the main tool definition."""
 
-import sys
-import subprocess
 import os
-from typing import Literal
 import signal
+import subprocess
+import sys
+from typing import Any, Literal
 
 # ANSI escape codes
 RED = "\033[91m"
@@ -20,21 +20,23 @@ def _write_to_stream(
     elif stream == "stderr":
         stream_id = sys.stderr
     else:
-        raise ValueError(f"Invalid stream: {stream}")
+        msg = f"Invalid stream: {stream}"
+        raise ValueError(msg)
 
     stream_id.write(message)
     stream_id.flush()
 
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python split_colors.py <command>")
+def main() -> None:
+    """Run the main entry point."""
+    if len(sys.argv) < 2:  # noqa: PLR2004
+        print("Usage: python -m color_stream '<command>'")  # noqa: T201
         sys.exit(1)
 
     # Join the command arguments
     command = " ".join(sys.argv[1:])
 
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # noqa: S602
         command,
         shell=True,
         stdout=subprocess.PIPE,
@@ -45,9 +47,12 @@ def main():
     os.set_blocking(process.stdout.fileno(), False)
     os.set_blocking(process.stderr.fileno(), False)
 
-    def signal_handler(sig_num, frame):
-        """Passes signals received by the parent process to the child process.
-        Exits the parent process with the appropriate signal code."""
+    def signal_handler(sig_num: int, _frame: Any) -> None:  # noqa: ANN401
+        """Pass signals received by the parent process to the child process.
+
+        Exits the parent process with the appropriate signal code.
+
+        """
         os.kill(process.pid, sig_num)
         sys.exit(128 + sig_num)
 

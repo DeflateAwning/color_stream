@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "gruntfuggly.todo-tree",
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "tamasfe.even-better-toml",
+	]
+}
