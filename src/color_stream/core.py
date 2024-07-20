@@ -7,6 +7,8 @@ import subprocess
 import sys
 from typing import Any, Literal
 
+from . import __version__
+
 # ANSI escape codes
 RED = "\033[91m"
 GREEN = "\033[92m"
@@ -28,18 +30,11 @@ def _write_to_stream(
     stream_id.flush()
 
 
-def main() -> None:
-    """Run the main entry point."""
-    if len(sys.argv) < 2:  # noqa: PLR2004
-        print("Usage: python -m color_stream '<command>'")  # noqa: T201
-        sys.exit(1)
-
-    # Join the command arguments
-    command = " ".join(sys.argv[1:])
-
-    process = subprocess.Popen(  # noqa: S602
+def run_command_with_colored_streams(command: str) -> None:
+    """Run the given command, coloring the streams."""
+    process = subprocess.Popen(
         command,
-        shell=True,
+        shell=True,  # noqa: S602
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         # TODO: stdin
@@ -79,6 +74,25 @@ def main() -> None:
 
         if (return_code := process.poll()) is not None:
             sys.exit(return_code)
+
+
+def main() -> None:
+    """Run the main entry point."""
+    usage_str = "Usage: python -m color_stream '<command>'"
+    if len(sys.argv) < 2:  # noqa: PLR2004
+        print(usage_str)
+        sys.exit(1)
+    elif len(sys.argv) == 2:  # noqa: PLR2004
+        if sys.argv[1] in ("-h", "--help"):
+            print(usage_str)
+            sys.exit(0)
+        elif sys.argv[1] in ("-v", "--version"):
+            print(f"color_stream {__version__}")
+            sys.exit(0)
+
+    # Join the command arguments
+    command = " ".join(sys.argv[1:])
+    run_command_with_colored_streams(command)
 
 
 if __name__ == "__main__":
