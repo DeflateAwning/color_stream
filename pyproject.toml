@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "color_stream"
 
 # Reminder: version is also in __init__.py.
-version = "0.3.0"
+version = "0.3.1"
 description = "A tool to run another shell command, and color the stdout/stderr streams green/red"
 authors = [{ name = "DeflateAwning" }]
 license = "Unlicense"
@@ -27,7 +27,6 @@ dev = [
 homepage = "https://github.com/DeflateAwning/color_stream"
 repository = "https://github.com/DeflateAwning/color_stream"
 issues = "https://github.com/DeflateAwning/color_stream/issues"
-license = "https://github.com/DeflateAwning/color_stream/blob/main/LICENSE"
 pypi = "https://pypi.org/project/color-stream/"
 
 [project.scripts]

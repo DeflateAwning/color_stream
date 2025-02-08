@@ -1,6 +1,6 @@
 """color_stream is a tool to explore stdout vs stderr output from a command."""
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 from .core import main
 
