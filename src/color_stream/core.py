@@ -14,9 +14,11 @@ RED = "\033[91m"
 GREEN = "\033[92m"
 RESET = "\033[0m"
 
+MAX_READ_SIZE_BYTES: int = 1024 * 1024
+
 
 def _write_to_stream(
-    message: str, stream: Literal["stdout", "stderr"]
+    message: bytes, stream: Literal["stdout", "stderr"]
 ) -> None:
     if stream == "stdout":
         stream_id = sys.stdout
@@ -26,15 +28,17 @@ def _write_to_stream(
         msg = f"Invalid stream: {stream}"
         raise ValueError(msg)
 
-    stream_id.write(message)
+    os.write(stream_id.fileno(), message)
     stream_id.flush()
 
 
-def run_command_with_colored_streams(command: str) -> None:
+def run_command_with_colored_streams(
+    command: str, *, enable_byte_count_log_at_end: bool
+) -> None:
     """Run the given command, coloring the streams."""
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # noqa: S602
         command,
-        shell=True,  # noqa: S602
+        shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         # TODO: stdin
@@ -61,28 +65,81 @@ def run_command_with_colored_streams(command: str) -> None:
     for sig in signals_to_pass:
         signal.signal(sig, signal_handler)
 
-    while True:
-        while stdout_content := process.stdout.read():
-            _write_to_stream(
-                f"{GREEN}{stdout_content.decode('utf-8')}{RESET}", "stdout"
-            )
+    total_stdout_bytes = 0
+    total_stdout_activations = 0
+    total_stderr_bytes = 0
+    total_stderr_activations = 0
 
-        while stderr_content := process.stderr.read():
+    while True:
+        bytes_since_checking_other_stream = 0
+        while (stdout_content := process.stdout.read()) and (
+            bytes_since_checking_other_stream < MAX_READ_SIZE_BYTES
+        ):
             _write_to_stream(
-                f"{RED}{stderr_content.decode('utf-8')}{RESET}", "stderr"
+                GREEN.encode() + stdout_content + RESET.encode(),
+                "stdout",
             )
+            len_stdout_content = len(stdout_content)
+            bytes_since_checking_other_stream += len_stdout_content
+            total_stdout_bytes += len_stdout_content
+        if bytes_since_checking_other_stream:
+            total_stdout_activations += 1
+
+        bytes_since_checking_other_stream = 0
+        while (stderr_content := process.stderr.read()) and (
+            bytes_since_checking_other_stream < MAX_READ_SIZE_BYTES
+        ):
+            _write_to_stream(
+                RED.encode() + stderr_content + RESET.encode(),
+                "stderr",
+            )
+            len_stderr_content = len(stderr_content)
+            bytes_since_checking_other_stream += len_stderr_content
+            total_stderr_bytes += len_stderr_content
+        if bytes_since_checking_other_stream:
+            total_stderr_activations += 1
 
         if (return_code := process.poll()) is not None:
+            if enable_byte_count_log_at_end:
+                print(
+                    "==== color_stream statistics (approx.) ====",
+                    file=sys.stderr,
+                )
+                print(
+                    f"Total stdout bytes: {total_stdout_bytes:,}",
+                    file=sys.stderr,
+                )
+                print(
+                    (
+                        "Total stdout activations: "
+                        f"{total_stdout_activations:,}"
+                    ),
+                    file=sys.stderr,
+                )
+                print(
+                    f"Total stderr bytes: {total_stderr_bytes:,}",
+                    file=sys.stderr,
+                )
+                print(
+                    (
+                        "Total stderr activations: "
+                        f"{total_stderr_activations:,}"
+                    ),
+                    file=sys.stderr,
+                )
+
             sys.exit(return_code)
 
 
 def main() -> None:
     """Run the main entry point."""
-    usage_str = "Usage: python -m color_stream '<command>'"
-    if len(sys.argv) < 2:  # noqa: PLR2004
+    usage_str = "Usage: python -m color_stream [optional: --stat] '<command>'"
+
+    if len(sys.argv) <= 1:
         print(usage_str)
         sys.exit(1)
-    elif len(sys.argv) == 2:  # noqa: PLR2004
+
+    elif len(sys.argv) == 2:
         if sys.argv[1] in ("-h", "--help"):
             print(usage_str)
             sys.exit(0)
@@ -90,9 +147,19 @@ def main() -> None:
             print(f"color_stream {__version__}")
             sys.exit(0)
 
-    # Join the command arguments
-    command = " ".join(sys.argv[1:])
-    run_command_with_colored_streams(command)
+    if sys.argv[1] in ("--stat", "--stats"):
+        enable_byte_count_log_at_end = True
+        command_parts = sys.argv[2:]
+    else:
+        enable_byte_count_log_at_end = False
+        command_parts = sys.argv[1:]
+
+    # Join the command arguments.
+    command = " ".join(command_parts)
+    run_command_with_colored_streams(
+        command,
+        enable_byte_count_log_at_end=enable_byte_count_log_at_end,
+    )
 
 
 if __name__ == "__main__":

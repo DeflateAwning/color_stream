@@ -1,12 +1,11 @@
 {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "charliermarsh.ruff",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "charliermarsh.ruff",
 
-    "files.exclude": {
-        "**/__pycache__/": true,
-        "**/.pytest_cache/": true
-    },
-    "editor.rulers": [
-        79
-    ],
+  "files.exclude": {
+    "**/__pycache__/": true,
+    "**/.pytest_cache/": true,
+    "**/.ruff_cache/": true
+  },
+  "editor.rulers": [79]
 }

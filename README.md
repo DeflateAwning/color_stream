@@ -18,11 +18,14 @@ color_stream '<another command here>'
 ## OR ##
 python3 -m color_stream '<another command here>'
 
-# test it with the demo script in this repo
+# Test it with the demo script in this repo:
 color_stream python demo_1.py
 
-# test it with "ls" (success, and error with file that doesn't exist)
+# Test it with "ls" (success, and error with file that doesn't exist):
 color_stream ls file_that_exists.txt file_that_does_not_exist.txt
+
+# Print out the total bytes count statistics:
+color_stream --stat python demo_1.py
 ```
 
 ## Limitations

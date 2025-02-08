@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "color_stream"
 
 # Reminder: version is also in __init__.py.
-version = "0.2.0"
+version = "0.3.0"
 description = "A tool to run another shell command, and color the stdout/stderr streams green/red"
 authors = [{ name = "DeflateAwning" }]
 license = "Unlicense"
@@ -15,6 +15,12 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: The Unlicense (Unlicense)",
     "Operating System :: OS Independent",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pyright",
 ]
 
 [project.urls]
@@ -29,10 +35,10 @@ color_stream = "color_stream.core:main"
 
 [tool.ruff.lint]
 select = ["ALL"]
-# ignore = ["FIX002"]
 ignore = [
     "TD002", "TD003", "FIX002", "COM812",
     "T201", # allow print statements
+    "PLR2004",
 ]
 
 [tool.ruff]
